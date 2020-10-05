@@ -19,12 +19,12 @@ When all goes well it will create a file in migrations directory like 2020100511
 
 
 	public function generate($table = FALSE) {
-		$this->load->library('AliRK_Migration');
+		$this->load->library('AMG_Migration');
 		if ($table) {
-			$this->alirk_migration->generate($table);
+			$this->amg_migration->generate($table);
 		}
 		else {
-			$this->alirk_migration->generate();
+			$this->amg_migration->generate();
 		}
 	}
     
