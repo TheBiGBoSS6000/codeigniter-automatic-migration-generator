@@ -2,7 +2,7 @@
 
 
 
-When all goes well it will create a file under migrations called 001_create_base.php under your migrations folder
+When all goes well it will create a file in migrations directory like 20201005113401_create_blog.php
 
 
 #To use:
