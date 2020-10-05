@@ -1,16 +1,16 @@
 <?php
 
 /**
- * AliRK_Migration Class
+ * AMG_Migration Class
  *
  * Create a Migration File from current DB
  *
  * @package		CodeIgniter
- * @subpackage	Libraries
+ * @subpackage		Libraries
  * @author		Ali R Kalantary
  * @link		https://github.com/TheBiGBoSS6000/codeigniter3-automatic-migration-generator
  */
-class AliRK_Migration {
+class AMG_Migration {
 
 	/**
 	 * @var object $_ci codeigniter
