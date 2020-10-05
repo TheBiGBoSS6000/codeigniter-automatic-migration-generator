@@ -1,0 +1,1 @@
+# codeigniter-automatic-migration-generator
