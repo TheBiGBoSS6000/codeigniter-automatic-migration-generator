@@ -262,7 +262,6 @@ class AMG_Migration {
 		}
 
 		$columns = $query->result_array();
-		print "<pre>" . var_export($columns, TRUE) . "</pre>";
 
 		$add_field_array = array();
 		$add_primary_key_field_array = array();
@@ -282,8 +281,7 @@ class AMG_Migration {
 				$add_key_field_array[] = $value['Field'];
 			}
 		}
-
-
+		
 		$str .= "\n\t\t" . '// Add Fields.' . "\n";
 		$add_field_str = "\t\t" . '$this->dbforge->add_field(';
 		$add_field_str .= var_export($add_field_array, TRUE);
