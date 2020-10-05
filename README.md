@@ -1,11 +1,11 @@
-#Create a Migration File from current DB
+# Create a Migration File from current DB
 
 
 
 When all goes well it will create a file in migrations directory like 20201005113401_create_blog.php
 
 
-#To use:
+# How To use:
 
 1: Enable migrations and set version to 0;
 
