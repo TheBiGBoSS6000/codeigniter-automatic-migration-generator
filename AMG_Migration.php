@@ -247,13 +247,13 @@ class AMG_Migration {
 	 * @return string
 	 */
 	public function get_function_up_content($table_name) {
-		$str = "\n\t" . '/**' . "\n";
-		$str .= "\t" . ' * up (create table)' . "\n";
-		$str .= "\t" . ' *' . "\n";
-		$str .= "\t" . ' * @return void' . "\n";
-		$str .= "\t" . ' */' . "\n";
-		$str .= "\t" . 'public function up()' . "\n";
-		$str .= "\t" . '{' . "\n";
+		$str = "";
+		$str .= "\n\t" . '/**';
+		$str .= "\n\t" . ' * up (create table)';
+		$str .= "\n\t" . ' *';
+		$str .= "\n\t" . ' * @return void';
+		$str .= "\n\t" . ' */';
+		$str .= "\n\t" . 'public function up() {';
 
 		$query = $this->_ci->db->query("SHOW FULL FIELDS FROM {$this->_ci->db->dbprefix($table_name)} FROM {$this->_db_name}");
 
@@ -262,29 +262,44 @@ class AMG_Migration {
 		}
 
 		$columns = $query->result_array();
+		print "<pre>" . var_export($columns, TRUE) . "</pre>";
 
-		$add_field_array = array();
-		$add_primary_key_field_array = array();
-		$add_key_field_array = array();
-		foreach ($columns as $key => $value) {
-			$add_field_array[$value['Field']]['type'] = $value['Type'];
+		$fields = array();
+		$PRI_fields = array();
+		$MUL_fields = array();
+		foreach ($columns as $value) {
+			$fields[$value['Field']]['type'] = $value['Type'];
+			if (!is_null($value['Default'])) {
+				if ($value['Default'] == 'current_timestamp()') {
+					$fields[$value['Field']]['type'] = 'timestamp';
+				}
+				else {
+					$fields[$value['Field']]['default'] = $value['Default'];
+				}
+			}
 			if ($value['Null'] == 'YES') {
-				$add_field_array[$value['Field']]['null'] = TRUE;
+				$fields[$value['Field']]['null'] = TRUE;
 			}
-			if (strpos($value['Extra'], 'auto_increment') !== FALSE) {
-				$add_field_array[$value['Field']]['auto_increment'] = TRUE;
+			if ($value['Extra'] == 'auto_increment') {
+				$fields[$value['Field']]['auto_increment'] = TRUE;
 			}
-			if (strpos($value['Key'], 'PRI') !== FALSE) {
-				$add_primary_key_field_array[] = $value['Field'];
+
+			// set Indexes
+			if ($value['Key'] == 'PRI') {
+				$PRI_fields[] = $value['Field'];
 			}
-			elseif ($value['Key'] !== '') {
-				$add_key_field_array[] = $value['Field'];
+			elseif ($value['Key'] == 'UNI') {
+				$fields[$value['Field']]['unique'] = TRUE;
+			}
+			elseif ($value['Key'] !== 'MUL') {
+				$MUL_fields[] = $value['Field'];
 			}
 		}
-		
+
+
 		$str .= "\n\t\t" . '// Add Fields.' . "\n";
 		$add_field_str = "\t\t" . '$this->dbforge->add_field(';
-		$add_field_str .= var_export($add_field_array, TRUE);
+		$add_field_str .= var_export($fields, TRUE);
 		$add_field_str .= ");" . "\n";
 		$str .= str_replace(
 				array("  ", "array (", "));"),
@@ -292,10 +307,10 @@ class AMG_Migration {
 				$add_field_str
 		);
 
-		if (!empty($add_primary_key_field_array)) {
+		if (!empty($PRI_fields)) {
 			$str .= "\n\t\t" . '// Add Primary Key(s).' . "\n";
 			$add_primary_key_field_str = "\t\t" . '$this->dbforge->add_key(';
-			$add_primary_key_field_str .= var_export($add_primary_key_field_array, TRUE);
+			$add_primary_key_field_str .= var_export($PRI_fields, TRUE);
 			$add_primary_key_field_str .= ", TRUE);" . "\n";
 			$str .= str_replace(
 					array("  ", "array (", "), TRUE);"),
@@ -304,10 +319,10 @@ class AMG_Migration {
 			);
 		}
 
-		if (!empty($add_key_field_array)) {
+		if (!empty($MUL_fields)) {
 			$str .= "\n\t\t" . '// Add Key(s).' . "\n";
 			$add_key_field_str = "\t\t" . '$this->dbforge->add_key(';
-			$add_key_field_str .= var_export($add_key_field_array, TRUE);
+			$add_key_field_str .= var_export($MUL_fields, TRUE);
 			$add_key_field_str .= ");" . "\n";
 			$str .= str_replace(
 					array("  ", "array (", "));"),
@@ -328,7 +343,7 @@ class AMG_Migration {
 		$attributes_str .= ((string) $engines['Comment'] !== '') ? "\t\t\t'COMMENT' => '\\'" . str_replace("'", "\\'", $engines['Comment']) . "'\\'',\n" : '';
 		$attributes_str .= "\t\t" . ');' . "\n";
 
-		$str .= "\n\t\t" . '// Table attributes.' . "\n";
+		$str .= "\n\t\t" . '// Table attributes.';
 		$str .= $attributes_str;
 
 		$str .= "\n\t\t" . '// Create Table ' . $table_name . "\n";
